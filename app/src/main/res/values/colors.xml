@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="red">#c93939</color>
+    <color name="transparent">#00ffffff</color>
+    <color name="mileage_accent_material_dark">#4d6a4d</color>
+</resources>

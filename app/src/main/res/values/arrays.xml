@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="drawer_array">
+        <item>Mileage</item>
+        <item>Deliveries</item>
+        <item>WebView</item>
+        <item>Maps</item>
+        <item>Location</item>
+        <item>Table Count</item>
+        <item>Create Tables</item>
+        <item>Delete All Tables</item>
+        <item>Delete Database</item>
+    </string-array>
+</resources>

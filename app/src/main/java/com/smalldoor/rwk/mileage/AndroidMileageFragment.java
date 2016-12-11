@@ -1,4 +1,4 @@
-package layout;
+package com.smalldoor.rwk.mileage;
 
 
 import android.annotation.SuppressLint;
@@ -13,9 +13,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.TextView;
-
-import com.smalldoor.rwk.mileage.R;
-import com.smalldoor.rwk.mileage.WebAppInterface;
 
 /**
  * Adroid version of the JavaScript Mileage screen

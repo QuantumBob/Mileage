@@ -6,21 +6,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import layout.AndroidMileageFragment;
-import layout.DeliveriesFragment;
-import layout.MileageFragment;
-
 public class MileageAppActivity extends LeftDrawerActivity {
 
-    private MileageDataDbHelper mDbHelper = new MileageDataDbHelper(this);
+    private DbHelper mDbHelper = new DbHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("2", "After testData call");
+        //mDbHelper.addTestData();
 
-        Fragment fragment = createFragment(1);
+        Fragment fragment = createFragment(0);
         if (fragment != null) {
             getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
         } else {
@@ -30,7 +26,7 @@ public class MileageAppActivity extends LeftDrawerActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mDbHelper.close();
+        DeliveryDepot.get(this).close();
     }
     @Override
     protected Fragment createFragment(int position) {
@@ -73,20 +69,29 @@ public class MileageAppActivity extends LeftDrawerActivity {
                 getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
                 break;
             case 5:
-                Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getWritableDatabase())));
+                mDbHelper.getTableCount(mDbHelper.getReadableDatabase());
                 break;
             case 6:
                 if(mDbHelper.createTables(mDbHelper.getWritableDatabase())){
                     Log.d("Tables", "Created");
-                    Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getWritableDatabase())));
+                    Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getReadableDatabase())));
                 } else {
                     Log.e("Tables", "NOT CREATED");
                 }
                 break;
             case 7:
                 if(mDbHelper.deleteTables(mDbHelper.getWritableDatabase())){
-                    Log.d("Tables", "Deleted");
-                    Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getWritableDatabase())));
+                    DeliveryDepot.get(this).deleteDeliveries();
+                    DeliveryDepot.get(this).deleteDates();
+                    try {
+                        DeliveriesFragment deliveriesFragment = (DeliveriesFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+                        deliveriesFragment.buildDateSpinner();
+                        Log.d("Tables", "Deleted");
+                        Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getReadableDatabase())));
+                    } catch (ClassCastException err) {
+                        Log.e("onDrawerItemClick", "deleteTables:" + err.toString());
+                    }
+
                 } else {
                     Log.e("Tables", "NOT DELETED");
                 }

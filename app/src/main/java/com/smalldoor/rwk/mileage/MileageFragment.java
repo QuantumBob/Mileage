@@ -1,4 +1,4 @@
-package layout;
+package com.smalldoor.rwk.mileage;
 
 import android.annotation.SuppressLint;
 import android.os.Build;

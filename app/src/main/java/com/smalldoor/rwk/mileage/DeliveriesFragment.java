@@ -1,4 +1,4 @@
-package layout;
+package com.smalldoor.rwk.mileage;
 
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -17,10 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import com.smalldoor.rwk.mileage.DeliveryDepot;
-import com.smalldoor.rwk.mileage.DeliveryDetail;
-import com.smalldoor.rwk.mileage.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,20 +99,30 @@ public class DeliveriesFragment extends Fragment implements AdapterView.OnItemSe
         view.requestFocus();
         return view;
     }
+    public void  buildDateSpinner(){
+        View view = getView();
+        if (view != null){
+            buildDateSpinner(view);
+        }
+    }
     /** sets up the spinner and populates it with the date info from the database **/
-    private void buildDateSpinner(View view){
+    public void buildDateSpinner(View view){
 
-        mDateSpinner = (Spinner) view.findViewById(R.id.spinDeliveryDate);
-        /** get the list of dates from the depot and add them to the spinner **/
-        ArrayList<String> mList = new ArrayList<>();
-        mList.add("Today");
-        mList.add("Pick");
-        mList.addAll(mDeliveryDepot.getDates());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.date_spinner_item, mList);
-        /** Specify the layout to use when the list of choices appears **/
-        adapter.setDropDownViewResource(R.layout.date_spinner_item);
-        /** Apply the adapter to the spinner **/
-        mDateSpinner.setAdapter(adapter);
+        try {
+            mDateSpinner = (Spinner) view.findViewById(R.id.spinDeliveryDate);
+            /** get the list of dates from the depot and add them to the spinner **/
+            ArrayList<String> mList = new ArrayList<>();
+            mList.add("Today");
+            mList.add("Pick");
+            mList.addAll(mDeliveryDepot.getDates());
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.date_spinner_item, mList);
+            /** Specify the layout to use when the list of choices appears **/
+            adapter.setDropDownViewResource(R.layout.date_spinner_item);
+            /** Apply the adapter to the spinner **/
+            mDateSpinner.setAdapter(adapter);
+        } catch (NullPointerException err) {
+            Log.e("buildDateSpinner", err.toString());
+        }
     }
     /** sets up the recycler view for the deliveries list **/
     private void buildDeliveriesRecycler(View view){

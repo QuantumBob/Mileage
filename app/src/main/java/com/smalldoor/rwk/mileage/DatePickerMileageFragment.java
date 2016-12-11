@@ -1,4 +1,4 @@
-package layout;
+package com.smalldoor.rwk.mileage;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

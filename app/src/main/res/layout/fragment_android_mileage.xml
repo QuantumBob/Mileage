@@ -4,7 +4,7 @@
     android:id="@+id/fragment_android_mileage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="layout.AndroidMileageFragment"
+    tools:context=".AndroidMileageFragment"
     android:layout_centerHorizontal="false"
     android:focusable="true"
     android:focusableInTouchMode="true">

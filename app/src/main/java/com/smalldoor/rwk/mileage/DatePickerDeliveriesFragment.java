@@ -1,4 +1,4 @@
-package layout;
+package com.smalldoor.rwk.mileage;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -7,8 +7,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
-
-import com.smalldoor.rwk.mileage.DeliveryDepot;
 
 import java.util.Calendar;
 
@@ -32,7 +30,10 @@ public class DatePickerDeliveriesFragment extends DialogFragment implements Date
     public void onDateSet(DatePicker view, int year, int month, int day) {
 
         String dateStr = Integer.toString(year) + "-" + Integer.toString(month) + "-" + Integer.toString(day);
+        //DbHelper.get(view.getContext()).addDate(dateStr);
         DeliveryDepot.get(view.getContext()).addDate(dateStr);
+        DeliveriesFragment deliveriesFragment = (DeliveriesFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+        deliveriesFragment.buildDateSpinner();
         InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }

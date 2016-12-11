@@ -1,5 +1,6 @@
 package com.smalldoor.rwk.mileage;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,37 +18,28 @@ import java.util.UUID;
  * Created by quant on 23/11/2016.
  * the list of deliveries in a singleton
  */
-public class DeliveryDepot {
+class DeliveryDepot {
 
     private static DeliveryDepot sDeliveryDepot;
-
+    private static DbHelper mDbHelper;
     private List<DeliveryDetail> mDeliveries;
     private ArrayList<String> mDates;
     private double mTotalSales;
     private double mTotalTips;
     private int mLocalDeliveries;
     private int mDistanceDeliveries;
-    private MileageDataDbHelper mDbHelper;
-
-    public static DeliveryDepot get(Context context) {
-        if (sDeliveryDepot == null) {
-            sDeliveryDepot = new DeliveryDepot(context);
-        }
-        return sDeliveryDepot;
-    }
-
+    /** constructor **/
     private DeliveryDepot(Context context) {
 
         mDates = new ArrayList<>();
         mDeliveries = new ArrayList<>();
-        mDbHelper = new MileageDataDbHelper(context);
+        mDbHelper = new DbHelper(context);
 
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();//DbHelper.get(context).getReadableDatabase();
         db.beginTransaction();
         try{
             setDeliveries("Today");
-            setDates();
+            setDates(db);
             db.setTransactionSuccessful();
         } catch (SQLiteException err) {
             Log.e("SQL", err.toString());
@@ -55,9 +47,39 @@ public class DeliveryDepot {
             db.endTransaction();
         }
     }
-    /** set the deliveries for a given date **/
-    public void setDeliveries(String date){
+    /** getter for the singleton **/
+    public static DeliveryDepot get(Context context) {
 
+        if (sDeliveryDepot == null) {
+            sDeliveryDepot = new DeliveryDepot(context);
+        }
+        return sDeliveryDepot;
+    }
+    void close(){
+        mDbHelper.close();
+    }
+    void addDate(String date){
+        ContentValues values = new ContentValues();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        if (mDbHelper.selectAll(MileageDbContract.Dates.TABLE_NAME, MileageDbContract.Dates.COLUMN_NAME_DATE, date)){
+            values.put(MileageDbContract.Dates.COLUMN_NAME_DATE, date);
+            db.insert(MileageDbContract.Dates.TABLE_NAME, null, values);
+        }
+    }
+
+    /** clears the private deliveries list **/
+    void deleteDeliveries(){
+        mDeliveries.clear();
+    }
+    /** clears the private dates list **/
+    void deleteDates(){
+        mDates.clear();
+    }
+    /** set the deliveries for a given date **/
+    void setDeliveries(String date){
+
+        // ### need to check table exists ###
         double mPrice = 0;
         double mTips = 0;
 
@@ -66,9 +88,9 @@ public class DeliveryDepot {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             date = formatter.format(rightNow.getTime());
         }
-        String table = MileageDbContract.Deliveries.TABLE_NAME;                       // The table to query
-        String[] RETURN = MileageDataDbHelper.getSqlColumnsDeliveries();                // The columns to return
-        String WHERE = MileageDbContract.Deliveries.COLUMN_NAME_DATE + " = ?";        // The rows for the WHERE clause
+        String table = MileageDbContract.Deliveries.TABLE_NAME;                 // The table to query
+        String[] RETURN = MileageDbContract.Deliveries.USE_COLUMNS;             // The columns to return
+        String WHERE = MileageDbContract.Deliveries.COLUMN_NAME_DATE + " = ?";  // The rows for the WHERE clause
         String[] selectionArgs = {date};                                        // The values for the WHERE clause
 //        String GROUPBY = null;                                                          // don't group the rows
 //        String HAVING = null;                                                           // don't filter by row groups
@@ -102,17 +124,13 @@ public class DeliveryDepot {
             db.endTransaction();
         }
     }
-    public void addDate(String date){
-        mDbHelper.addDate(date);
-        setDates();
-    }
     /** sets the mDates list from the database **/
-    private void setDates() {
+    private void setDates(SQLiteDatabase db) {
         String table = MileageDbContract.Dates.TABLE_NAME;                  // The table to query
         String[] RETURN = {MileageDbContract.Dates.COLUMN_NAME_DATE};       // The columns to return
         String orderBy = MileageDbContract.Dates.COLUMN_NAME_DATE + " ASC"; // The sort order
 
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        //SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor;
         db.beginTransaction();
         try {
@@ -156,15 +174,15 @@ public class DeliveryDepot {
         mLocalDeliveries = localDeliveries;
     }
 
-    public int getLocalDeliveries() {
+    int getLocalDeliveries() {
         return mLocalDeliveries;
     }
 
-    public int getDistanceDeliveries() {
+    int getDistanceDeliveries() {
         return mDistanceDeliveries;
     }
 
-    public double getTotalTips() {
+    double getTotalTips() {
         return mTotalTips;
     }
 
@@ -172,7 +190,7 @@ public class DeliveryDepot {
         mTotalTips += totalTips;
     }
 
-    public double getTotalSales() {
+    double getTotalSales() {
         return mTotalSales;
     }
 
@@ -180,7 +198,7 @@ public class DeliveryDepot {
         mTotalSales += totalSales;
     }
 
-    public List<DeliveryDetail> getDeliveries() {
+    List<DeliveryDetail> getDeliveries() {
         return mDeliveries;
     }
 

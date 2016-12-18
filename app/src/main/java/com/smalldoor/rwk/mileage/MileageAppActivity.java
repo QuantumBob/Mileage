@@ -8,15 +8,16 @@ import android.widget.AdapterView;
 
 public class MileageAppActivity extends LeftDrawerActivity {
 
-    private DbHelper mDbHelper = new DbHelper(this);
-
+    /* member variables */
+    private DbHelper mDbHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
-        //mDbHelper.addTestData();
+        mDbHelper = DbHelper.get(this);
 
-        Fragment fragment = createFragment(0);
+        Fragment fragment = createFragment(1);
         if (fragment != null) {
             getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
         } else {
@@ -26,7 +27,7 @@ public class MileageAppActivity extends LeftDrawerActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        DeliveryDepot.get(this).close();
+        mDbHelper.close();
     }
     @Override
     protected Fragment createFragment(int position) {
@@ -51,12 +52,10 @@ public class MileageAppActivity extends LeftDrawerActivity {
         }
         return fragment;
     }
-
     @Override
     protected Bundle putArguments(Fragment fragment) {
         return null;
     }
-
     @Override
     protected void onDrawerItemClick(AdapterView<?> parent, View view, int position, long id){
 
@@ -69,25 +68,35 @@ public class MileageAppActivity extends LeftDrawerActivity {
                 getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
                 break;
             case 5:
-                mDbHelper.getTableCount(mDbHelper.getReadableDatabase());
+                mDbHelper.getTableCount(null);
                 break;
             case 6:
-                if(mDbHelper.createTables(mDbHelper.getWritableDatabase())){
-                    Log.d("Tables", "Created");
-                    Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getReadableDatabase())));
+                if (mDbHelper.clearTables(null)){
+                    try {
+                        DeliveriesFragment deliveriesFragment = (DeliveriesFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+                        deliveriesFragment.buildDateSpinner(null);
+                    } catch (ClassCastException err) {
+                        Log.e("onDrawerItemClick", "clearTables:" + err.toString());
+                    }
+                    mDbHelper.getTableCount(null);
+                } else {
+                    Log.e("Tables", "NOT CLEARED");
+                }
+                break;
+            case 7:
+                if(mDbHelper.createTables(null)){
+                    mDbHelper.getTableCount(null);
                 } else {
                     Log.e("Tables", "NOT CREATED");
                 }
                 break;
-            case 7:
-                if(mDbHelper.deleteTables(mDbHelper.getWritableDatabase())){
-                    DeliveryDepot.get(this).deleteDeliveries();
-                    DeliveryDepot.get(this).deleteDates();
+            case 8:
+                if(mDbHelper.deleteTables(null)){
+                    DeliveryDepot.get(this).clearDeliveriesList();
+                    DeliveryDepot.get(this).clearDatesList();
                     try {
                         DeliveriesFragment deliveriesFragment = (DeliveriesFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
-                        deliveriesFragment.buildDateSpinner();
-                        Log.d("Tables", "Deleted");
-                        Log.d("Table count", Integer.toString(mDbHelper.getTableCount(mDbHelper.getReadableDatabase())));
+                        deliveriesFragment.buildDateSpinner(null);
                     } catch (ClassCastException err) {
                         Log.e("onDrawerItemClick", "deleteTables:" + err.toString());
                     }
@@ -96,11 +105,18 @@ public class MileageAppActivity extends LeftDrawerActivity {
                     Log.e("Tables", "NOT DELETED");
                 }
                 break;
-            case 8:
+            case 9:
                 if(deleteDatabase("MileageApp.db")){
-                    Log.d("Database", "Deleted");
+                    Log.d("onDrawerItemClick", "Database Deleted");
                 } else {
                     Log.e("Database", "NOT DELETED");
+                }
+                break;
+            case 10:
+                if (mDbHelper.addTestData(null)){
+                    Log.d("onDrawerItemClick", "Test data added");
+                } else {
+                    Log.e("onDrawerItemClick", "NO DATA ADDED");
                 }
                 break;
             default:

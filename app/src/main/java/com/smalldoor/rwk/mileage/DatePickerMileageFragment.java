@@ -9,8 +9,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
-import com.smalldoor.rwk.mileage.R;
-
 import java.util.Calendar;
 
 /**

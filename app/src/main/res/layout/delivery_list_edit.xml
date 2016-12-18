@@ -2,55 +2,55 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/linear_non_edit"
-    style="@style/list_spacing"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/text_view_border">
+    android:background="@drawable/text_view_border"
+    style="@style/list_spacing">
 
-    <TextView
-        android:id="@+id/delivery_list_item_num_text_view"
+    <EditText
+        android:id="@+id/delivery_list_item_num_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:longClickable="true"
-        android:paddingEnd="0dp"
-        android:paddingLeft="@dimen/num_text_view_padding_horizontal"
-        android:paddingRight="0dp"
-        android:paddingStart="@dimen/num_text_view_padding_horizontal"
-        android:tag="Recycler num"
         tools:text="Num"
+        android:tag="Recycler num"
         />
-
-    <TextView
+    <EditText
         android:id="@+id/delivery_list_item_price_text_view"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:gravity="center"
-        android:tag="Recycler price"
+        android:layout_weight="1"
         tools:text="Delivery Price"
+        android:tag="Recycler price"
         />
-
-
-    <TextView
+    <EditText
         android:id="@+id/delivery_list_item_tip_text_view"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:gravity="center"
-        android:tag="Recycler tip"
+        android:layout_weight="1"
         tools:text="Delivery Tip"
+        android:tag="Recycler tip"
         />
-
-
     <CheckBox
         android:id="@+id/delivery_list_item_local_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:clickable="false"
+        android:layout_weight="0.5"
+        android:clickable="true"
         android:tag="Recycler local"
         />
+    <ImageView
+        android:id="@+id/delivery_list_item_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/edit_delivery"
+        android:contentDescription="@string/edit_delivery_access"
+        android:tint="@color/mileage_green"
+        android:layout_gravity="center"
+        android:padding="@dimen/text_view_margin_horizontal"
+        android:tag="Recycler handle"/>
 
 </LinearLayout>

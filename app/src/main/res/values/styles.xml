@@ -4,6 +4,7 @@
     <style name="MileageTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorAccent">@color/mileage_accent_material_light</item>
     </style>
+
     <!-- Spacing for delivery list items -->
     <style name="list_spacing">
         <item name="android:layout_marginBottom">5dp</item>

@@ -1,7 +1,5 @@
 package com.smalldoor.rwk.mileage;
 
-import java.util.UUID;
-
 /**
  * Created by quant on 23/11/2016.
  * Holds the details for a single delivery
@@ -9,18 +7,27 @@ import java.util.UUID;
 
 public class DeliveryDetail {
 
-    private UUID mId;
-    private boolean mLocal;
+    private int mId;
+    private String mDate;
+    private int mTicketNumber;
     private double mPrice;
     private double mTip;
-    private int mTicketNumber;
+    private boolean mLocal;
 
 
     DeliveryDetail() {
-        mId = UUID.randomUUID();
+
     }
 
-    public UUID getId() {
+    public String getDate() {
+        return mDate;
+    }
+
+    public void setDate(String date) {
+        mDate = date;
+    }
+
+    public int getId() {
         return mId;
     }
 

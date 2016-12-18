@@ -7,8 +7,10 @@
         <item>Maps</item>
         <item>Location</item>
         <item>Table Count</item>
+        <item> Clear Tables</item>
         <item>Create Tables</item>
-        <item>Delete All Tables</item>
+        <item>Delete Tables</item>
         <item>Delete Database</item>
+        <item>Add Test Data</item>
     </string-array>
 </resources>

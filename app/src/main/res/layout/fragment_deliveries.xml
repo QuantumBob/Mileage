@@ -27,16 +27,6 @@
             android:hint="@string/date"
             android:ellipsize="start"
             android:gravity="center"/>
-        <!--EditText
-            android:id="@+id/editDeliveryDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="date"
-            android:textSize="@dimen/text_size_small"
-            android:hint="@string/date"
-            android:ellipsize="start"
-            android:gravity="center"/-->
     </LinearLayout>
     <LinearLayout
         android:id="@+id/row_new"
@@ -160,6 +150,12 @@
             android:layout_height="wrap_content"
             android:text="@string/LocalHeading"
             />
+        <!--TextView
+            android:id="@+id/delivery_list_item_local_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_heading"
+            /-->
     </LinearLayout>
     <!--RecyclerView list of deliveries
         with LinearLayout wrapper-->

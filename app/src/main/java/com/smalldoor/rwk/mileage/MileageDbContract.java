@@ -10,21 +10,15 @@ import android.provider.BaseColumns;
 
 final class MileageDbContract {
 
-    /**
-     * private so cannot be accidentally instantiated
-     **/
+    /* private so cannot be accidentally instantiated */
     private MileageDbContract() {
     }
 
-    /**
-     * If you change the database schema, you must increment the database version.
-     **/
+    /* If you change the database schema, you must increment the database version. */
     static final int DATABASE_VERSION = 1;
     static final String DATABASE_NAME = "MileageApp.db";
 
-    /**
-     * query helper strings
-     **/
+    /* query helper strings */
     private static final String TEXT_TYPE = " TEXT";
     private static final String BOOL_TYPE = " BOOLEAN";
     private static final String INT_TYPE = " INT";
@@ -33,9 +27,7 @@ final class MileageDbContract {
     private static final String CLOSE_PARENTHESIS = " )";
     private static final String COMMA_SEP = ",";
 
-    /**
-     * Inner classes that defines the tables contents
-     **/
+    /* Inner classes that defines the tables contents */
     static abstract class Mileages implements BaseColumns {
 
         static final String TABLE_NAME = "mileage";

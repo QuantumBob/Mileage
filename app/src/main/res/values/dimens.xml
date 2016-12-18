@@ -11,4 +11,5 @@
     <dimen name="text_view_margin_horizontal">2dp</dimen>
     <dimen name="edit_text_margin_horizontal">64dp</dimen>
     <dimen name="row_margin_vertical">10dp</dimen>
+    <dimen name="num_text_view_padding_horizontal">6dp</dimen>
 </resources>

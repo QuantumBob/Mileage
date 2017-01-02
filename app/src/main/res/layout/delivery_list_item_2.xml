@@ -53,13 +53,14 @@
         />
 
 
-    <CheckBox
-        android:id="@+id/delivery_list_item_local_checkbox"
+    <TextView
+        android:id="@+id/delivery_list_item_extra_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:clickable="false"
-        android:tag="Recycler local"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:tag="Recycler extra"
+        tools:text="Delivery Extra"
         />
 
 </LinearLayout>

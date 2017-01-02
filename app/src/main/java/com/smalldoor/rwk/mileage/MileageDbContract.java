@@ -36,20 +36,42 @@ final class MileageDbContract {
         static final String COLUMN_NAME_END_MILES = "endMiles";
         static final String COLUMN_NAME_FUEL_BOUGHT = "FuelBought";
         static final String COLUMN_NAME_PRICE_UNIT = "priceUnit";
+//        static final String COLUMN_NAME_UNITS = "units";
         static final String COLUMN_NAME_MILEAGE = "mileage";
 
         static final String CREATE_TABLE =
                 "CREATE TABLE IF NOT EXISTS " +
-                        MileageDbContract.Mileages.TABLE_NAME + " (" +
-                        MileageDbContract.Mileages._ID + " INTEGER PRIMARY KEY," +
-                        MileageDbContract.Mileages.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
-                        MileageDbContract.Mileages.COLUMN_NAME_START_MILES + FLOAT_TYPE + COMMA_SEP +
-                        MileageDbContract.Mileages.COLUMN_NAME_END_MILES + FLOAT_TYPE + COMMA_SEP +
-                        MileageDbContract.Mileages.COLUMN_NAME_FUEL_BOUGHT + FLOAT_TYPE + COMMA_SEP +
-                        MileageDbContract.Mileages.COLUMN_NAME_PRICE_UNIT + FLOAT_TYPE + COMMA_SEP +
-                        MileageDbContract.Mileages.COLUMN_NAME_MILEAGE + FLOAT_TYPE + " )";
+                        Mileages.TABLE_NAME + " (" +
+                        Mileages._ID + " INTEGER PRIMARY KEY," +
+                        Mileages.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
+                        Mileages.COLUMN_NAME_START_MILES + FLOAT_TYPE + COMMA_SEP +
+                        Mileages.COLUMN_NAME_END_MILES + FLOAT_TYPE + COMMA_SEP +
+                        Mileages.COLUMN_NAME_FUEL_BOUGHT + FLOAT_TYPE + COMMA_SEP +
+                        Mileages.COLUMN_NAME_PRICE_UNIT + FLOAT_TYPE + COMMA_SEP +
+//                        Mileages.COLUMN_NAME_UNITS + TEXT_TYPE + COMMA_SEP +
+                        Mileages.COLUMN_NAME_MILEAGE + FLOAT_TYPE + " )";
 
-        static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + MileageDbContract.Mileages.TABLE_NAME;
+        static final String[] USE_COLUMNS_FOR_CHART = {
+                Mileages._ID,
+                Mileages.COLUMN_NAME_DATE,
+                Mileages.COLUMN_NAME_MILEAGE
+        };
+
+        static final String[] USE_COLUMNS_ALL = {
+                Mileages._ID,
+                Mileages.COLUMN_NAME_DATE,
+                Mileages.COLUMN_NAME_START_MILES,
+                Mileages.COLUMN_NAME_END_MILES,
+                Mileages.COLUMN_NAME_FUEL_BOUGHT,
+                Mileages.COLUMN_NAME_PRICE_UNIT,
+                Mileages.COLUMN_NAME_MILEAGE
+        };
+
+        static final String DELETE_WHERE = Mileages._ID + " = ?";
+
+        static final String UPDATE_WHERE = Mileages._ID  + " = ?";
+
+        static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + Mileages.TABLE_NAME;
     }
 
     static class Deliveries implements BaseColumns {
@@ -59,6 +81,7 @@ final class MileageDbContract {
         static final String COLUMN_NAME_TICKET_NUM = "ticketNum";
         static final String COLUMN_NAME_PRICE = "price";
         static final String COLUMN_NAME_LOCAL = "local";
+        static final String COLUMN_NAME_EXTRA = "extra";
         static final String COLUMN_NAME_TIPS = "tips";
 
         static final String CREATE_TABLE =
@@ -68,7 +91,8 @@ final class MileageDbContract {
                         Deliveries.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
                         Deliveries.COLUMN_NAME_TICKET_NUM + INT_TYPE + COMMA_SEP +
                         Deliveries.COLUMN_NAME_PRICE + FLOAT_TYPE + COMMA_SEP +
-                        Deliveries.COLUMN_NAME_LOCAL + BOOL_TYPE + COMMA_SEP +
+//                        Deliveries.COLUMN_NAME_LOCAL + BOOL_TYPE + COMMA_SEP +
+                        Deliveries.COLUMN_NAME_EXTRA + COMMA_SEP +
                         Deliveries.COLUMN_NAME_TIPS + FLOAT_TYPE + " )";
 
         static final String[] USE_COLUMNS = {
@@ -76,7 +100,8 @@ final class MileageDbContract {
                 MileageDbContract.Deliveries.COLUMN_NAME_DATE,
                 MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM,
                 MileageDbContract.Deliveries.COLUMN_NAME_PRICE,
-                MileageDbContract.Deliveries.COLUMN_NAME_LOCAL,
+//                MileageDbContract.Deliveries.COLUMN_NAME_LOCAL,
+                Deliveries.COLUMN_NAME_EXTRA,
                 MileageDbContract.Deliveries.COLUMN_NAME_TIPS
         };
 

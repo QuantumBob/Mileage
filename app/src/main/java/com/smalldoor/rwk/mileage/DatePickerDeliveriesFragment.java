@@ -3,16 +3,14 @@ package com.smalldoor.rwk.mileage;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.DATE_PICKED_RESULT_CODE;
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.RETURN_DATE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.DATE_PICKED_RESULT_CODE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_DATE;
 
 /**
  * pops up the date picker
@@ -40,9 +38,6 @@ public class DatePickerDeliveriesFragment extends DialogFragment implements Date
         Intent intent = new Intent();
         intent.putExtra(RETURN_DATE, dateStr);
         getTargetFragment().onActivityResult(getTargetRequestCode(), DATE_PICKED_RESULT_CODE, intent);
-
-        InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
 

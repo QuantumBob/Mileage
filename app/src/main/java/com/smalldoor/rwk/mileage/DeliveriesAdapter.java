@@ -56,6 +56,7 @@ class DeliveriesAdapter extends RecyclerView.Adapter<DeliveriesAdapter.DeliveryH
         /** get element from your list at this position, replace the contents of the view with that element **/
         DeliveryDetail delivery = mDeliveries.get(position);
 
+        holder.mId.setText(String.valueOf(delivery.getId()));
         holder.mTicketNumView.setText(String.valueOf(delivery.getTicketNumber()));
         holder.mPriceTextView.setText(String.format(Locale.ENGLISH, "%.2f", delivery.getPrice()));
         holder.mTipTextView.setText(String.format(Locale.ENGLISH, "%.2f", delivery.getTip()));
@@ -74,6 +75,7 @@ class DeliveriesAdapter extends RecyclerView.Adapter<DeliveriesAdapter.DeliveryH
     /* the holder for one item in the list **/
     class DeliveryHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
+        private TextView mId;
         private TextView mTicketNumView;
         private TextView mPriceTextView;
         private TextView mTipTextView;
@@ -81,6 +83,8 @@ class DeliveriesAdapter extends RecyclerView.Adapter<DeliveriesAdapter.DeliveryH
 
         DeliveryHolder(View itemView) {
             super(itemView);
+
+            mId = (TextView) itemView.findViewById(R.id.delivery_list_item_id_text_view);
             mTicketNumView = (TextView) itemView.findViewById(R.id.delivery_list_item_num_text_view);
             mPriceTextView = (TextView) itemView.findViewById(R.id.delivery_list_item_price_text_view);
             mTipTextView = (TextView) itemView.findViewById(R.id.delivery_list_item_tip_text_view);

@@ -45,16 +45,6 @@ class DbHelper extends SQLiteOpenHelper {
 //        createTables(db);
 //        addTestData(db);
     }
-    /* called by system when database opened */
-    @Override
-    public void onOpen(SQLiteDatabase db){
-
-        Log.d("Location", "onOpen");
-//        if (getTableCount(db) == 0){
-//            createTables(db);
-//            addTestData(db);
-//        }
-    }
     /* called by system when database upgraded */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -239,6 +229,28 @@ class DbHelper extends SQLiteOpenHelper {
         Log.d("getTableCount", "tables = " + Integer.toString(count));
         return count;
     }
+
+    public int getRowCount(String tableName){
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor mCursor = db.query(tableName, null, null, null, null, null, null);
+        int count = mCursor.getCount();
+        mCursor.close();
+        return count;
+    }
+    /** returns the number of entries in the given table or 0 if there is an error or the table is empty */
+    int isTableEmpty(String tableName){
+
+        long count;
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            count = queryNumEntries(db, tableName);
+            return (int) count;
+        } catch (SQLiteException err){
+            Log.e("isTableEmpty", err.toString());
+            return 0;
+        }
+    }
     /* string value exists in given table */
     boolean stringExists(String tableName, String field, String value) {
 
@@ -271,11 +283,9 @@ class DbHelper extends SQLiteOpenHelper {
         }
         if (getTableCount(db) <= 0){
             createTables(db);
-            //setTestData(db);
         } else {
             deleteTables(db);
             createTables(db);
-            //setTestData(db);
         }
 
         if (db != null) {
@@ -289,7 +299,6 @@ class DbHelper extends SQLiteOpenHelper {
                 values.put(MileageDbContract.Deliveries.COLUMN_NAME_TIPS, Math.random() * 2);
 
                 db.insert(MileageDbContract.Deliveries.TABLE_NAME, null, values);
-
             }
 
             Calendar date = Calendar.getInstance();
@@ -308,37 +317,4 @@ class DbHelper extends SQLiteOpenHelper {
         }
         return true;
     }
-    /* sets the test data. Does not check if the tables exist */
-//    private void setTestData(SQLiteDatabase db){
-//
-//        //SQLiteDatabase db = getWritableDatabase();
-//        if (db != null) {
-//            ContentValues values = new ContentValues();
-//
-//            for (int i = 0; i < 20; i ++) {
-//                values.put(MileageDbContract.Deliveries.COLUMN_NAME_DATE, "2016-10-23");
-//                values.put(MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM, i+1);
-//                values.put(MileageDbContract.Deliveries.COLUMN_NAME_PRICE, Math.random() * 20);
-//                values.put(MileageDbContract.Deliveries.COLUMN_NAME_LOCAL, i % 2 == 1);
-//                values.put(MileageDbContract.Deliveries.COLUMN_NAME_TIPS, Math.random() * 2);
-//
-//                db.insert(MileageDbContract.Deliveries.TABLE_NAME, null, values);
-//
-//            }
-//
-//            Calendar date = Calendar.getInstance();
-//            date.set(2016, 9, 22);
-//            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-//            String dateStr;
-//
-//            values.clear();
-//
-//            for (int i = 0; i < 6; i ++) {
-//                date.add(Calendar.DAY_OF_MONTH, 1);
-//                dateStr = formatter.format(date.getTime());
-//                values.put(MileageDbContract.Dates.COLUMN_NAME_DATE, dateStr);
-//                db.insert(MileageDbContract.Dates.TABLE_NAME, null, values);
-//            }
-//        }
-//    }
 }

@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,27 +24,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Locale;
 
-/** Fragment to show the deliveries screen */
-public class DeliveriesFragment extends Fragment implements OnItemLongClickListener{
+import static com.smalldoor.rwk.mileage.MileageAppActivity.DATE_PICKED_RESULT_CODE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.EDIT_DELETE_RESULT_CODE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.EDIT_UPDATE_RESULT_CODE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_DATE;
 
-    /* constants */
-    public static final int DATE_PICKED_RESULT_CODE = 123;
-    public static final String RETURN_DATE = "Return Date";
-    public static final int EDIT_UPDATE_RESULT_CODE = 789;
-    public static final String RETURN_NUM = "Return Num";
-    public static final String RETURN_PRICE = "Return Price";
-    public static final String RETURN_TIP = "Return Tip";
-    public static final String RETURN_LOCAL = "Return Local";
+
+/**
+ * Fragment to show the deliveries screen
+ */
+public class DeliveriesFragment extends Fragment implements OnItemLongClickListener {
+
     /* member variables **/
     private RecyclerView mRecyclerView;
     private Spinner mDateSpinner;
     private EditText mNum;
     private EditText mPrice;
     private EditText mTip;
+    private EditText mExtra;
     private CheckBox mLocal;
     ImageButton mImageButton;
     private TextView mPriceTotals;
@@ -56,25 +55,11 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
     private String mCurrentDate;
     private DeliveryDepot mDeliveryDepot;
     private DeliveriesFragment mDeliveriesFragment;
+    private ArrayAdapter<String> mDateSpinnerAdapter;
 
-    /** the listeners for the ticketNumber EditText*/
-    private final TextWatcher ticketNumWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-
-        }
-    };
-    /** the listeners for the date spinner */
+    /**
+     * the listeners for the date spinner
+     */
     private final AdapterView.OnItemSelectedListener dateSpinnerSelectedListener = new AdapterView.OnItemSelectedListener() {
 
         @Override
@@ -87,6 +72,7 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
             } else {
                 mDeliveryDepot.buildDeliveriesListFromDb(adapterView.getItemAtPosition(i).toString(), null);
             }
+            mCurrentDate = adapterView.getItemAtPosition(i).toString();
             updateUI();
 
             String item = adapterView.getItemAtPosition(i).toString();
@@ -95,18 +81,21 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
                 mCurrentDate = item;
             }
         }
+
         @Override
         public void onNothingSelected(AdapterView<?> adapterView) {
 
         }
     };
-    /** the listener for the add delivery button */
+    /**
+     * the listener for the add delivery button
+     */
     private final ImageButton.OnTouchListener addButtonTouchListener = new ImageButton.OnTouchListener() {
 
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
 
-            if (MotionEvent.ACTION_UP == motionEvent.getAction()){
+            if (MotionEvent.ACTION_UP == motionEvent.getAction()) {
 
                 DeliveryDetail delivery = new DeliveryDetail();
 
@@ -133,51 +122,111 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
                 delivery.setLocal(mLocal.isChecked());
 
                 mDeliveryDepot.addDateToDb(date);
-                buildDateSpinner(null);
-                updateDateSpinner(date);
-                mDeliveryDepot.incrementTotalSales(delivery.getPrice());
+                mDeliveryDepot.incrementTotalPrice(delivery.getPrice());
                 mDeliveryDepot.incrementTotalTips(delivery.getTip());
+                if (mLocal.isChecked()) {
+                    mDeliveryDepot.incrementLocalDelivery();
+                } else {
+                    mDeliveryDepot.incrementDistanceDelivery();
+                }
                 mDeliveryDepot.addNewDeliveryToDb(delivery, null);
+                mDeliveryDepot.buildDeliveriesListFromDb(date, null);
 
                 clearNewDeliveryEditTexts();
 
                 /* need to close soft keyboard after delivery added */
-                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                closeSoftKeyboard(view);
 
                 updateUI();
             }
             return false;
         }
     };
-    /** listener for RecyclerView to hide soft keyboard */
+    /**
+     * the listener for the add delivery button
+     */
+    private final ImageButton.OnTouchListener addButton2TouchListener = new ImageButton.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+
+            if (MotionEvent.ACTION_UP == motionEvent.getAction()) {
+
+                DeliveryDetail delivery = new DeliveryDetail();
+
+                String ticketNumber = mNum.getText().toString();
+                String price = mPrice.getText().toString();
+                String tip = mTip.getText().toString();
+                String extra = mExtra.getText().toString();
+                String date = getDate();
+
+                if (ticketNumber.isEmpty() || price.isEmpty() || date.isEmpty()) return false;
+                if (tip.isEmpty()) {
+                    tip = "0";
+                }
+
+                /* need to test for existing ticket number or auto add a number */
+                if (mDeliveryDepot.ticketNumExistsInList(Integer.valueOf(ticketNumber, 10))) {
+                    Toast.makeText(getActivity(), "Ticket number : " + ticketNumber + " already exists.", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                delivery.setDate(date);
+                delivery.setTicketNumber(Integer.valueOf(ticketNumber, 10));
+                delivery.setPrice(Double.valueOf(price));
+                delivery.setTip(Double.valueOf(tip));
+                delivery.setExtra(Double.valueOf(extra));
+
+                mDeliveryDepot.addDateToDb(date);
+                mDeliveryDepot.incrementTotalPrice(delivery.getPrice());
+                mDeliveryDepot.incrementTotalTips(delivery.getTip());
+                mDeliveryDepot.incrementTotalExtras(delivery.getExtra());
+                mDeliveryDepot.addNewDeliveryToDb(delivery, null);
+                mDeliveryDepot.buildDeliveriesListFromDb(date, null);
+
+                clearNewDeliveryEditTexts();
+
+                /* need to close soft keyboard after delivery added */
+                closeSoftKeyboard(view);
+
+                updateUI();
+            }
+            return false;
+        }
+    };
+    /**
+     * listener for RecyclerView to hide soft keyboard
+     */
     private final RecyclerView.OnTouchListener recyclerTouchListener = new RecyclerView.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent motionEvent) {
             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 Log.d("recycler touched", "yeah");
             }
-            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            closeSoftKeyboard(v);
             return false;
         }
     };
 
-    /** Required empty public constructor **/
+    /**
+     * Required empty public constructor
+     **/
     public DeliveriesFragment() {
     }
 
-    /** create the view for the whole list **/
+    /**
+     * create the view for the whole list
+     **/
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         super.onCreateView(inflater, container, savedInstanceState);
-        /* get the DeliveryDepot instance. Should be first call to it */
+        /* get the DeliveryDepot instance. SHOULD be first call to it! */
         mDeliveryDepot = DeliveryDepot.get(getActivity());
         mDeliveriesFragment = this;
 
         /* Inflate the layout for this fragment */
-        View view = inflater.inflate(R.layout.fragment_deliveries, container, false);
+        View view = inflater.inflate(R.layout.fragment_deliveries_2, container, false);
         /* Cache some variables */
         mPriceTotals = (TextView) view.findViewById(R.id.delivery_list_item_price_total);
         mTipsTotal = (TextView) view.findViewById(R.id.delivery_list_item_tip_total);
@@ -186,25 +235,35 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
         mNum = (EditText) view.findViewById(R.id.delivery_list_new_num);
         mPrice = (EditText) view.findViewById(R.id.delivery_list_new_price);
         mTip = (EditText) view.findViewById(R.id.delivery_list_new_tip);
+        mExtra = (EditText) view.findViewById(R.id.delivery_list_new_extra);
         mLocal = (CheckBox) view.findViewById(R.id.delivery_list_item_local_checkbox);
+        mDateSpinner = (Spinner) view.findViewById(R.id.spinDeliveryDate);
 
-        /* add watcher to ticket number field */
-        mNum.addTextChangedListener(ticketNumWatcher);
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+            }
+        });
 
         buildAddButton(view);
-
-        mDateSpinner = (Spinner) view.findViewById(R.id.spinDeliveryDate);
-        mDateSpinner.setOnItemSelectedListener(dateSpinnerSelectedListener);
         buildDateSpinner(view);
-        mCurrentDate = getDate();
-
+        mCurrentDate = mDeliveryDepot.getToday();
         buildDeliveriesRecycler(view);
+
+        mDeliveryDepot.setTotalPrice();
+        mDeliveryDepot.setTotalTips();
 
         updateUI();
         view.requestFocus();
         return view;
     }
-    /** edit the item that is touched */
+
+    /**
+     * edit the item that is touched
+     */
     @Override
     public void onLongClick(View view, RecyclerView.ViewHolder viewHolder) {
 
@@ -212,9 +271,10 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
         DialogFragment itemEditDialog = new ItemEditDialog();
 
         Bundle args = new Bundle();
+        args.putDouble("Price", mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getPrice());
+        args.putDouble("Tip", mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getTip());
+        args.putString("id", String.valueOf(mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getId()));
         args.putString("ticketNum", String.valueOf(mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getTicketNumber()));
-        args.putString("Price", String.valueOf(mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getPrice()));
-        args.putString("Tip", String.valueOf(mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).getTip()));
         args.putBoolean("Local", mDeliveryDepot.getDeliveryByPosition(viewHolder.getLayoutPosition()).isLocal());
         itemEditDialog.setArguments(args);
 
@@ -222,19 +282,22 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
         itemEditDialog.show(getFragmentManager(), "ItemEdit");
 
     }
-    /** sets the image button up */
+
+    /**
+     * sets the image button up
+     */
     private void buildAddButton(View view) {
 
         mImageButton = (ImageButton) view.findViewById(R.id.delivery_list_item_add);
-        mImageButton.setOnTouchListener(addButtonTouchListener);
+        mImageButton.setOnTouchListener(addButton2TouchListener);
     }
 
-    /** sets up the spinner and populates it with the date info from the database **/
+    /**
+     * sets up the spinner and populates it with the date info from the database
+     **/
     public void buildDateSpinner(@Nullable View view) {
 
-        if (view == null) {
-            view = getView();
-        }
+        view = view == null ? getView() : view;
 
         try {
             if (view != null) {
@@ -242,32 +305,26 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
             } else {
                 return;
             }
-            /** get the list of dates from the depot and add them to the spinner **/
+            /* get the list of dates from the depot and add them to the spinner **/
             mDeliveryDepot.buildDatesListFromDb(null);
-            ArrayList<String> mList = new ArrayList<>();
-            mList.addAll(mDeliveryDepot.getDates());
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.date_spinner_item, mList);
-            /** Specify the layout to use when the list of choices appears **/
-            adapter.setDropDownViewResource(R.layout.date_spinner_item);
+            mDateSpinnerAdapter = new ArrayAdapter<>(getActivity(), R.layout.date_spinner_item, mDeliveryDepot.getDates());
 
-            /** Apply the adapter to the spinner **/
-            mDateSpinner.setAdapter(adapter);
+            /* Specify the layout to use when the list of choices appears **/
+            mDateSpinnerAdapter.setDropDownViewResource(R.layout.date_spinner_item);
+
+            /* Apply the adapter to the spinner **/
+            mDateSpinner.setAdapter(mDateSpinnerAdapter);
+            /* set the listener for the spinner (see top of class) */
+            mDateSpinner.setOnItemSelectedListener(dateSpinnerSelectedListener);
 
         } catch (NullPointerException err) {
             Log.e("buildDateSpinner", err.toString());
         }
     }
 
-    /** updates spinner after a date has been added */
-    public void updateDateSpinner(String date) {
-
-        @SuppressWarnings("unchecked")
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>)mDateSpinner.getAdapter();
-
-        int i = adapter.getPosition(date);
-        mDateSpinner.setSelection(i);
-    }
-    /** sets up the recycler view for the deliveries list **/
+    /**
+     * sets up the recycler view for the deliveries list
+     **/
     private void buildDeliveriesRecycler(View view) {
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         /* improves performance if changes in content do not change layout size of RecyclerView */
@@ -276,38 +333,58 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         /* set the touch listener. See top of class */
         mRecyclerView.setOnTouchListener(recyclerTouchListener);
+
     }
-    /** updates the list on every onCreateView call **/
-    private void updateUI() {
+
+    /**
+     * updates the list on every onCreateView call
+     **/
+    public void updateUI() {
 
         DeliveriesAdapter mAdapter = new DeliveriesAdapter(getActivity().getApplicationContext(), this);
         mRecyclerView.setAdapter(mAdapter);
 
-        mPriceTotals.setText(getString(R.string.totalPrice, mDeliveryDepot.getTotalSales()));
+        mPriceTotals.setText(getString(R.string.totalPrice, mDeliveryDepot.getTotalPrice()));
         mTipsTotal.setText(getString(R.string.totalTip, mDeliveryDepot.getTotalTips()));
 
-        double totalWage = 40 + (mDeliveryDepot.getDistanceDeliveries() * 1.5) + mDeliveryDepot.getLocalDeliveries() + mDeliveryDepot.getTotalTips();
+//        double totalWage = 40 + (mDeliveryDepot.getDistanceDeliveries() * 1.5) + mDeliveryDepot.getLocalDeliveries() + mDeliveryDepot.getTotalTips();
+//        mWage.setText(getString(totalWage, totalWage));
+        double totalWage = 40 + mDeliveryDepot.getTotalExtras();
         mWage.setText(getString(R.string.totalWage, totalWage));
 
-        double totalShop = mDeliveryDepot.getTotalSales() - totalWage;
+        double totalShop = mDeliveryDepot.getTotalPrice() - totalWage;
         mShop.setText(getString(R.string.totalShop, totalShop));
     }
 
-    /** clear new delivery EditTexts */
-    private void clearNewDeliveryEditTexts(){
+    /** closes the keyboard */
+    private void closeSoftKeyboard(@Nullable View view){
+
+        view = view == null ? getView() : view;
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (view != null) {
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * clear new delivery EditTexts
+     */
+    private void clearNewDeliveryEditTexts() {
         mNum.setText("");
         mPrice.setText("");
         mTip.setText("");
-        mLocal.setChecked(false);
+//        mLocal.setChecked(false);
+        mExtra.setText("");
     }
 
-    /** gets the current visible date from the date spinner */
+    /**
+     * gets the current visible date from the date spinner
+     */
     private String getDate() {
 
-        String date = mDateSpinner.getSelectedItem().toString();//.getItemAtPosition(0).toString();
-        if (date.isEmpty()) {
-            return "";
-        } else if (date.toLowerCase().equals("today")) {
+        String date = mDateSpinner.getSelectedItem().toString();
+
+        if (date.isEmpty() || date.equalsIgnoreCase("today") || date.equalsIgnoreCase("pick")) {
             Calendar cDate = Calendar.getInstance();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             date = formatter.format(cDate.getTime());
@@ -315,19 +392,45 @@ public class DeliveriesFragment extends Fragment implements OnItemLongClickListe
         return date;
     }
 
-    /** the callback from the date picker */
+    /**
+     * the callback from the date picker
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode == DATE_PICKED_RESULT_CODE) {
-            mDeliveryDepot.addDateToDb(data.getStringExtra(RETURN_DATE));
-            buildDateSpinner(getView());
-            updateDateSpinner(data.getStringExtra(RETURN_DATE));
-        }
-        if (resultCode == EDIT_UPDATE_RESULT_CODE) {
-            mDeliveryDepot.updateDeliveryInDb(data, null);
+        switch (resultCode){
+            case DATE_PICKED_RESULT_CODE:
+                String date = data.getStringExtra(RETURN_DATE);
+                mDateSpinnerAdapter.add(date);
+                mDateSpinnerAdapter.sort(new Comparator<String>() {
+                    @Override
+                    public int compare(String s, String t1) {
+                        if (t1.equalsIgnoreCase("Today") || t1.equalsIgnoreCase("Pick") ) {
+                            return 0;
+                        }
+                        return s.compareToIgnoreCase(t1);
+                    }
+                });
+                mDateSpinnerAdapter.notifyDataSetChanged();
+                mDateSpinner.setSelection(mDateSpinnerAdapter.getPosition(date));
+                closeSoftKeyboard(null);
+                break;
+            case EDIT_UPDATE_RESULT_CODE:
+                data.putExtra(RETURN_DATE, mCurrentDate);
+                mDeliveryDepot.updateDeliveryInDb(data, null);
+                mDeliveryDepot.buildDeliveriesListFromDb(data.getStringExtra(RETURN_DATE), null);
+                closeSoftKeyboard(null);
+                updateUI();
+                break;
+            case EDIT_DELETE_RESULT_CODE:
+                data.putExtra(RETURN_DATE, mCurrentDate);
+                mDeliveryDepot.deleteDeliveryFromDb(data, null);
+                mDeliveryDepot.buildDeliveriesListFromDb(data.getStringExtra(RETURN_DATE), null);
+                closeSoftKeyboard(null);
+                updateUI();
+                break;
+
+            default:
+                break;
         }
     }
-
-
-
 }

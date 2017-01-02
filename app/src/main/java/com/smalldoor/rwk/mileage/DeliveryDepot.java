@@ -1,10 +1,10 @@
 package com.smalldoor.rwk.mileage;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.Nullable;
@@ -16,10 +16,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.RETURN_LOCAL;
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.RETURN_NUM;
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.RETURN_PRICE;
-import static com.smalldoor.rwk.mileage.DeliveriesFragment.RETURN_TIP;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_DATE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_ID;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_LOCAL;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_NUM;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_PRICE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_TIP;
 
 /**
  * Created by QuantumBob on 23/11/2016.
@@ -31,8 +33,9 @@ class DeliveryDepot {
     private static DeliveryDepot sDeliveryDepot;
     private List<DeliveryDetail> mDeliveries;
     private ArrayList<String> mDates;
-    private double mTotalSales;
+    private double mTotalPrice;
     private double mTotalTips;
+    private double mTotalExtras;
     private int mLocalDeliveries;
     private int mDistanceDeliveries;
     private DbHelper mDbHelper;
@@ -51,10 +54,8 @@ class DeliveryDepot {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         db.beginTransaction();
         try {
-            if (DatabaseUtils.queryNumEntries(db, MileageDbContract.Deliveries.TABLE_NAME) <= 0) {
-                mDbHelper.addTestData(db);
-            }
             buildDeliveriesListFromDb("Today", null);
+            buildDatesListFromDb(null);
             db.setTransactionSuccessful();
         } catch (SQLiteException err) {
             Log.e("SQL", err.toString());
@@ -72,6 +73,15 @@ class DeliveryDepot {
         return sDeliveryDepot;
     }
 
+    public void updateUI(Activity activity) {
+        try {
+            DeliveriesFragment deliveriesFragment = (DeliveriesFragment)activity.getFragmentManager().findFragmentById(R.id.fragment_container);
+            deliveriesFragment.updateUI();
+        } catch (ClassCastException err) {
+            Log.e("updateUI", err.toString());
+        }
+    }
+
     /** adds the data from the new delivery inputs at top of screen */
     boolean addNewDeliveryToDb(DeliveryDetail delivery, @Nullable SQLiteDatabase db) {
 
@@ -83,6 +93,8 @@ class DeliveryDepot {
         }
         ContentValues values = new ContentValues();
 
+        /*auto adds id */
+//        values.put(MileageDbContract.Deliveries._ID, delivery.getId());
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_DATE, delivery.getDate());
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM, delivery.getTicketNumber());
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_PRICE, delivery.getPrice());
@@ -90,7 +102,31 @@ class DeliveryDepot {
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_TIPS, delivery.getTip());
         try {
             db.insert(MileageDbContract.Deliveries.TABLE_NAME, null, values);
-            mDeliveries.add(delivery);
+//            mDeliveries.add(delivery);
+//            Collections.sort(mDeliveries, new Comparator<DeliveryDetail>() {
+//                @Override
+//                public int compare(DeliveryDetail s, DeliveryDetail t1) {
+//                    int result;
+//                    if (s.getTicketNumber() == t1.getTicketNumber()){
+//                        result = 0;
+//                    } else if (s.getTicketNumber() < t1.getTicketNumber()) {
+//                        result = -1;
+//                    } else result = 1;
+//                    return result;
+//                }
+//            });
+//            mDeliveries.sort(new Comparator<DeliveryDetail>() {
+//                @Override
+//                public int compare(DeliveryDetail s, DeliveryDetail t1) {
+//                    int result;
+//                    if (s.getTicketNumber() == t1.getTicketNumber()){
+//                        result = 0;
+//                    } else if (s.getTicketNumber() < t1.getTicketNumber()) {
+//                        result = -1;
+//                    } else result = 1;
+//                    return result;
+//                }
+//            });
 
         } catch (SQLiteException err) {
             Log.e("addNewDeliveryToDb", err.toString());
@@ -159,7 +195,7 @@ class DeliveryDepot {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             date = formatter.format(rightNow.getTime());
         }
-        String table = MileageDbContract.Deliveries.TABLE_NAME;                 // The table to query
+        String TABLE = MileageDbContract.Deliveries.TABLE_NAME;                 // The table to query
         String[] RETURN = MileageDbContract.Deliveries.USE_COLUMNS;             // The columns to return
         String WHERE = MileageDbContract.Deliveries.COLUMN_NAME_DATE + " = ?";  // The rows for the WHERE clause
         String[] selectionArgs = {date};                                        // The values for the WHERE clause
@@ -179,16 +215,17 @@ class DeliveryDepot {
         Cursor cursor;
         db.beginTransaction();
         try {
-            cursor = db.query(table, RETURN, WHERE, selectionArgs, null, null, orderBy);
+            cursor = db.query(TABLE, RETURN, WHERE, selectionArgs, null, null, orderBy);
             //cursor.moveToFirst();
             mDeliveries.clear();
             while (cursor.moveToNext()) {
                 DeliveryDetail delivery = new DeliveryDetail();
+                delivery.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MileageDbContract.Deliveries._ID)));
                 delivery.setTicketNumber(cursor.getInt(cursor.getColumnIndexOrThrow(MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM)));
                 delivery.setPrice(cursor.getFloat(cursor.getColumnIndexOrThrow(MileageDbContract.Deliveries.COLUMN_NAME_PRICE)));
                 boolean local = cursor.getInt(cursor.getColumnIndexOrThrow(MileageDbContract.Deliveries.COLUMN_NAME_LOCAL)) != 0;
                 delivery.setLocal(local);
-                incrementTotalSales(mPrice);
+                incrementTotalPrice(mPrice);
                 delivery.setTip(cursor.getFloat(cursor.getColumnIndexOrThrow(MileageDbContract.Deliveries.COLUMN_NAME_TIPS)));
                 incrementTotalTips(mTips);
                 mDeliveries.add(delivery);
@@ -202,6 +239,48 @@ class DeliveryDepot {
         } finally {
             db.endTransaction();
         }
+    }
+
+    /** returns today's date as a string */
+    String getToday() {
+
+        Calendar cDate = Calendar.getInstance();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        return formatter.format(cDate.getTime());
+    }
+
+    boolean deleteDeliveryFromDb(Intent data, @Nullable SQLiteDatabase db){
+
+        if (db == null || db.isReadOnly()) {
+            db = mDbHelper.getWritableDatabase();
+        }
+        if (!mDbHelper.doesTableExist(MileageDbContract.Deliveries.TABLE_NAME)) {
+            db.execSQL(MileageDbContract.Deliveries.CREATE_TABLE);
+        }
+        String date = data.getStringExtra(RETURN_DATE);
+        if (date.equalsIgnoreCase("today")) {
+            date = getToday();
+        }
+        ContentValues values = new ContentValues();
+
+        values.put(MileageDbContract.Deliveries._ID, data.getStringExtra(RETURN_ID));
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_DATE, date);
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM, data.getStringExtra(RETURN_NUM));
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_PRICE, data.getStringExtra(RETURN_PRICE));
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_LOCAL, data.getBooleanExtra(RETURN_LOCAL, true));
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_TIPS, data.getStringExtra(RETURN_TIP));
+
+        try {
+            String[] value = {data.getStringExtra(RETURN_ID)};
+//            int i = db.update(MileageDbContract.Deliveries.TABLE_NAME, values, MileageDbContract.Deliveries._ID + "= ?", value);
+            int i = db.delete(MileageDbContract.Deliveries.TABLE_NAME, MileageDbContract.Deliveries._ID + "= ?", value);
+            Log.d("delete", Integer.toString(i));
+        } catch (SQLiteException err) {
+            Log.e("deleteDeliveryFromDb", err.toString());
+            return false;
+        }
+
+        return true;
     }
 
     /** update the delivery that was being edited */
@@ -218,20 +297,25 @@ class DeliveryDepot {
         if (!mDbHelper.doesTableExist(MileageDbContract.Deliveries.TABLE_NAME)) {
             db.execSQL(MileageDbContract.Deliveries.CREATE_TABLE);
         }
+        String date = data.getStringExtra(RETURN_DATE);
+        if (date.equalsIgnoreCase("today")) {
+            date = getToday();
+        }
         ContentValues values = new ContentValues();
 
-        //values.put(MileageDbContract.Deliveries.COLUMN_NAME_DATE, delivery.getDate());
+        values.put(MileageDbContract.Deliveries._ID, data.getStringExtra(RETURN_ID));
+        values.put(MileageDbContract.Deliveries.COLUMN_NAME_DATE, date);
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_TICKET_NUM, data.getStringExtra(RETURN_NUM));
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_PRICE, data.getStringExtra(RETURN_PRICE));
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_LOCAL, data.getBooleanExtra(RETURN_LOCAL, true));
         values.put(MileageDbContract.Deliveries.COLUMN_NAME_TIPS, data.getStringExtra(RETURN_TIP));
-        try {
-            //db.insert(MileageDbContract.Deliveries.TABLE_NAME, null, values);
-            db.update(MileageDbContract.Deliveries.TABLE_NAME, values, null, null);
-            //mDeliveries.add(delivery);
 
+        try {
+            String[] value = {data.getStringExtra(RETURN_ID)};
+            int i = db.update(MileageDbContract.Deliveries.TABLE_NAME, values, MileageDbContract.Deliveries._ID + "= ?", value);
+            Log.d("update", Integer.toString(i));
         } catch (SQLiteException err) {
-            Log.e("addNewDeliveryToDb", err.toString());
+            Log.e("updateDeliveryInDb", err.toString());
             return false;
         }
 
@@ -319,14 +403,39 @@ class DeliveryDepot {
         mTotalTips += totalTips;
     }
 
-    /** returns the total sales variable */
-    double getTotalSales() {
-        return mTotalSales;
+    /** increment the total extras by the given amount **/
+    void incrementTotalExtras(double totalExtras) {
+        mTotalExtras += totalExtras;
     }
 
+    /** returns the total sales variable */
+    double getTotalPrice() {
+        return mTotalPrice;
+    }
+
+    /** returns the total amount of extras (delivery charges) in the list
+     *
+     */
+    double getTotalExtras() {
+        return mTotalExtras;
+    }
     /** increments the total sales variable by the given amount */
-    void incrementTotalSales(double totalSales) {
-        mTotalSales += totalSales;
+    void incrementTotalPrice(double totalSales) {
+        mTotalPrice += totalSales;
+    }
+    
+    void setTotalPrice() {
+
+        for( final DeliveryDetail delivery : mDeliveries) {
+            incrementTotalPrice(delivery.getPrice());
+        }
+    }
+
+    void setTotalTips() {
+
+        for( final DeliveryDetail delivery : mDeliveries) {
+            incrementTotalTips(delivery.getTip());
+        }
     }
 
     /** returns the deliveries list */

@@ -3,13 +3,15 @@ package com.smalldoor.rwk.mileage;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
 import java.util.Calendar;
+
+import static com.smalldoor.rwk.mileage.MileageAppActivity.DATE_PICKED_RESULT_CODE;
+import static com.smalldoor.rwk.mileage.MileageAppActivity.RETURN_DATE;
 
 /**
  * pops up the date picker
@@ -31,8 +33,12 @@ public class DatePickerMileageFragment extends DialogFragment implements DatePic
     public void onDateSet(DatePicker view, int year, int month, int day) {
 
         TextView dateView = (TextView) getActivity().findViewById(R.id.editMileageDate);
-        dateView.setText(Integer.toString(day) +  "/" + Integer.toString(month) +  "/" + Integer.toString(year));
-        InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(dateView.getWindowToken(), 0);
+        dateView.setText(Integer.toString(day) +  "-" + Integer.toString(month + 1) +  "-" + Integer.toString(year));
+
+        /* return the date to MileagesFragment */
+        Intent intent = new Intent();
+        intent.putExtra(RETURN_DATE, "");
+        getTargetFragment().onActivityResult(getTargetRequestCode(), DATE_PICKED_RESULT_CODE, intent);
+
     }
 }

@@ -12,6 +12,7 @@ public class DeliveryDetail {
     private int mTicketNumber;
     private double mPrice;
     private double mTip;
+    private double mExtra;
     private boolean mLocal;
 
 
@@ -31,12 +32,24 @@ public class DeliveryDetail {
         return mId;
     }
 
+    public void setId(int id) {
+        mId = id;
+    }
+
     public double getTip() {
         return mTip;
     }
 
     void setTip(double tip) {
         mTip = tip;
+    }
+
+    public double getExtra() {
+        return mExtra;
+    }
+
+    public void setExtra(double extra) {
+        mExtra = extra;
     }
 
     public double getPrice() {

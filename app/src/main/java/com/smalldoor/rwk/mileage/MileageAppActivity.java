@@ -8,6 +8,17 @@ import android.widget.AdapterView;
 
 public class MileageAppActivity extends LeftDrawerActivity {
 
+    /* constants */
+    public static final int DATE_PICKED_RESULT_CODE = 123;
+    public static final String RETURN_DATE = "Return Date";
+    public static final int EDIT_UPDATE_RESULT_CODE = 789;
+    public static final int EDIT_DELETE_RESULT_CODE = 987;
+    public static final String RETURN_NUM = "Return Num";
+    public static final String RETURN_PRICE = "Return Price";
+    public static final String RETURN_TIP = "Return Tip";
+    public static final String RETURN_LOCAL = "Return Local";
+    public static final String RETURN_ID = "Return Id";
+
     /* member variables */
     private DbHelper mDbHelper;
     @Override
@@ -35,7 +46,8 @@ public class MileageAppActivity extends LeftDrawerActivity {
         Fragment fragment = null;
         switch (position) {
             case 0:
-                fragment = new AndroidMileageFragment();
+                fragment = new MileageFragment();
+//                setContentView(R.layout.fragment_mileage);
                 break;
 
             case 1:
@@ -43,7 +55,7 @@ public class MileageAppActivity extends LeftDrawerActivity {
                 break;
 
             case 2:
-                fragment = new MileageFragment();
+                fragment = new WebViewMileageFragment();
                 break;
 
             default:
@@ -114,6 +126,9 @@ public class MileageAppActivity extends LeftDrawerActivity {
                 break;
             case 10:
                 if (mDbHelper.addTestData(null)){
+                    DeliveryDepot.get(this).buildDeliveriesListFromDb("Today", null);
+                    DeliveryDepot.get(this).buildDatesListFromDb(null);
+                    DeliveryDepot.get(this).updateUI(this);
                     Log.d("onDrawerItemClick", "Test data added");
                 } else {
                     Log.e("onDrawerItemClick", "NO DATA ADDED");

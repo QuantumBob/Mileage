@@ -89,16 +89,25 @@
             android:inputType="numberDecimal"
             android:textSize="@dimen/text_size_small"
             android:maxLines="1"
-            android:nextFocusDown="@id/delivery_list_new_num"
             android:tag="tip edit"/>
-        <CheckBox
-            android:id="@+id/delivery_list_item_local_checkbox"
+        <TextView
+            android:text="@string/ExtraHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:text="@string/LocalHeading"
+            android:gravity="center"
             android:textSize="@dimen/text_size_small"
-            android:tag="@string/LocalHeading"/>
+            android:tag="@string/ExtraHeading"
+            />
+        <EditText
+            android:id="@+id/delivery_list_new_extra"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal"
+            android:textSize="@dimen/text_size_small"
+            android:maxLines="1"
+            android:nextFocusDown="@id/delivery_list_new_num"
+            android:tag="local edit"/>
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/delivery_list_item_add"
@@ -146,17 +155,12 @@
             android:layout_weight="1"
             android:text="@string/TipHeading"/>
         <TextView
-            android:id="@+id/delivery_list_item_local_heading"
+            android:id="@+id/delivery_list_item_extra_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/LocalHeading"
+            android:text="@string/ExtraHeading"
             />
-        <!--TextView
-            android:id="@+id/delivery_list_item_local_edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/edit_heading"
-            /-->
+
     </LinearLayout>
     <!--RecyclerView list of deliveries
         with LinearLayout wrapper-->

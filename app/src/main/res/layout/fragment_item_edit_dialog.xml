@@ -12,7 +12,7 @@
     <!--RecyclerView column headings-->
     <RelativeLayout
         android:id="@+id/row_heading"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/text_view_padding_horizontal"
         android:orientation="horizontal"
@@ -28,6 +28,7 @@
             android:layout_alignParentStart="true"
             android:paddingLeft="@dimen/num_text_view_padding_horizontal"
             android:paddingRight="@dimen/num_text_view_padding_horizontal"
+            android:minWidth="60dp"
             />
         <TextView
             android:id="@+id/delivery_list_item_price_heading"
@@ -39,6 +40,7 @@
             android:layout_toEndOf="@id/delivery_list_item_num_heading"
             android:paddingLeft="@dimen/num_text_view_padding_horizontal"
             android:paddingRight="@dimen/num_text_view_padding_horizontal"
+            android:minWidth="60dp"
             />
         <TextView
             android:id="@+id/delivery_list_item_tip_heading"
@@ -50,23 +52,34 @@
             android:text="@string/TipHeading"
             android:paddingLeft="@dimen/text_size_small"
             android:paddingRight="@dimen/text_size_small"
+            android:minWidth="60dp"
             />
         <TextView
             android:id="@+id/delivery_list_item_local_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_alignParentRight="true"
             android:layout_toRightOf="@id/delivery_list_item_tip_heading"
             android:layout_toEndOf="@id/delivery_list_item_tip_heading"
             android:text="@string/LocalHeading"
-            android:minWidth="10dp"
             android:paddingLeft="@dimen/num_text_view_padding_horizontal"
             android:paddingRight="@dimen/num_text_view_padding_horizontal"
+            android:minWidth="60dp"
             />
 
+        <EditText
+            android:id="@+id/delivery_list_new_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:hint="@string/ticket_id"
+            />
         <EditText
             android:id="@+id/delivery_list_new_num"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/delivery_list_item_num_heading"
@@ -75,7 +88,7 @@
             android:layout_alignRight="@id/delivery_list_item_num_heading"
             android:layout_alignEnd="@id/delivery_list_item_num_heading"
             android:inputType="numberDecimal"
-            android:textSize="@dimen/text_size_small"
+            android:textSize="@dimen/text_size_medium"
             android:minWidth="10dp"
             android:hint="@string/NumHeading"
             android:imeOptions="actionNext"
@@ -95,7 +108,7 @@
             android:layout_alignEnd="@id/delivery_list_item_price_heading"
             android:inputType="number"
             android:hint="@string/PriceHeading"
-            android:textSize="@dimen/text_size_small"
+            android:textSize="@dimen/text_size_medium"
             android:minWidth="10dp"
             android:imeOptions="actionNext"
             android:maxLines="1"
@@ -113,7 +126,7 @@
             android:layout_alignRight="@id/delivery_list_item_tip_heading"
             android:layout_alignEnd="@id/delivery_list_item_tip_heading"
             android:inputType="number"
-            android:textSize="@dimen/text_size_small"
+            android:textSize="@dimen/text_size_medium"
             android:maxLines="1"
             android:minWidth="10dp"
             android:hint="@string/TipHeading"
@@ -122,21 +135,22 @@
             android:paddingLeft="@dimen/num_text_view_padding_horizontal"
             android:paddingRight="@dimen/num_text_view_padding_horizontal"
             />
-        <CheckBox
+        <!--need to center box in view. see http://stackoverflow.com/questions/13411288/center-checkbox-drawable-within-itself -->
+        <com.smalldoor.rwk.mileage.CheckableImageView
             android:id="@+id/delivery_list_item_local_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_below="@id/delivery_list_item_local_heading"
             android:layout_alignLeft="@id/delivery_list_item_local_heading"
             android:layout_alignStart="@id/delivery_list_item_local_heading"
-            android:layout_alignRight="@id/delivery_list_item_local_heading"
-            android:layout_alignEnd="@id/delivery_list_item_local_heading"
+            android:layout_alignParentRight="true"
             android:layout_alignBottom="@id/delivery_list_new_tip"
             android:tag="@string/LocalHeading"
             android:paddingLeft="@dimen/num_text_view_padding_horizontal"
             android:paddingRight="@dimen/num_text_view_padding_horizontal"
-
-            />
+            android:src="@drawable/image_view_check"
+            android:clickable="true"/>
     </RelativeLayout>
 
 
@@ -152,20 +166,31 @@
 
         <Button
             android:id="@+id/dialog_update"
-            style="?android:buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
             android:text="@string/dialog_update"
+            android:background="@drawable/button_background"
+            style="@style/rwk_button"
+            />
+
+        <Button
+            android:id="@+id/dialog_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_delete"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/button_background"
+            style="@style/rwk_button"
             />
 
         <Button
             android:id="@+id/dialog_cancel"
-            style="?android:buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
             android:text="@string/dialog_cancel"
+            android:background="@drawable/button_background"
+            style="@style/rwk_button"
             />
 
     </LinearLayout>
